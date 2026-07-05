@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mandir Review Insights</title>
+    <link rel="stylesheet" href="./styles.css?v=202607041300">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Google Reviews Analysis</p>
+        <h1>BAPS Swaminarayan Mandir Pune</h1>
+      </div>
+      <div class="header-actions">
+        <button id="reloadData" class="refresh-button" type="button" aria-label="Refresh data">↻</button>
+      </div>
+    </header>
+
+    <main>
+      <div id="reviewModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+        <div class="modal-card">
+          <div class="modal-head">
+            <h2 id="reviewModalTitle">Full Review</h2>
+            <button id="closeReviewModal" class="icon-button" type="button" aria-label="Close review">×</button>
+          </div>
+          <div id="reviewModalBody" class="modal-body"></div>
+        </div>
+      </div>
+
+      <section class="status-strip">
+        <div>
+          <span class="muted">Dataset</span>
+          <strong id="datasetStatus">Loading latest scraper export...</strong>
+        </div>
+        <div>
+          <span class="muted">Last Review</span>
+          <strong id="lastReviewDate">-</strong>
+        </div>
+        <div>
+          <span class="muted">Filtered Reviews</span>
+          <strong id="filteredCount">-</strong>
+        </div>
+      </section>
+
+      <section class="filters" aria-label="Dashboard filters">
+        <label>
+          Date From
+          <input id="dateFrom" type="date">
+        </label>
+        <label>
+          Date To
+          <input id="dateTo" type="date">
+        </label>
+        <label>
+          Sentiment
+          <select id="sentimentFilter">
+            <option value="">All</option>
+            <option>Positive</option>
+            <option>Neutral</option>
+            <option>Negative</option>
+          </select>
+        </label>
+        <label>
+          Rating
+          <select id="ratingFilter">
+            <option value="">All</option>
+            <option value="5">5 stars</option>
+            <option value="4">4 stars</option>
+            <option value="3">3 stars</option>
+            <option value="2">2 stars</option>
+            <option value="1">1 star</option>
+          </select>
+        </label>
+        <label>
+          Category
+          <select id="categoryFilter">
+            <option value="">All</option>
+          </select>
+        </label>
+        <label>
+          Year / Month
+          <select id="monthFilter">
+            <option value="">All</option>
+          </select>
+        </label>
+        <label class="keyword-field">
+          Keyword
+          <input id="keywordFilter" type="search" placeholder="parking, queue, peaceful...">
+        </label>
+        <label class="check-row">
+          <input id="suggestionsOnly" type="checkbox">
+          Suggestions only
+        </label>
+      </section>
+
+      <div class="tab-nav" role="tablist" aria-label="Dashboard sections">
+        <button class="tab-button active" data-tab="home" type="button" role="tab" aria-selected="true">Home</button>
+        <button class="tab-button" data-tab="actions" type="button" role="tab" aria-selected="false">Immediate Action Required</button>
+        <button class="tab-button" data-tab="latest" type="button" role="tab" aria-selected="false">Latest Reviews</button>
+        <button class="tab-button" data-tab="attention" type="button" role="tab" aria-selected="false">Reviews Requiring Attention</button>
+        <button class="tab-button" data-tab="category" type="button" role="tab" aria-selected="false">Category Summary</button>
+      </div>
+
+      <section id="homeTab" class="tab-panel active" role="tabpanel">
+        <section class="kpi-grid">
+          <article class="kpi"><span>Total Reviews</span><strong id="kpiTotal">0</strong></article>
+          <article class="kpi positive"><span>Positive</span><strong id="kpiPositive">0</strong></article>
+          <article class="kpi neutral"><span>Neutral</span><strong id="kpiNeutral">0</strong></article>
+          <article class="kpi negative"><span>Negative</span><strong id="kpiNegative">0</strong></article>
+          <article class="kpi"><span>Sentiment Score</span><strong id="kpiScore">0</strong></article>
+          <article class="kpi"><span>Avg. Rating</span><strong id="kpiRating">0.0</strong></article>
+        </section>
+
+        <section class="insights-grid">
+          <article>
+            <h2>Executive Summary</h2>
+            <p id="summaryText"></p>
+          </article>
+          <article>
+            <h2>What Visitors Appreciate</h2>
+            <ol id="positiveThemes"></ol>
+          </article>
+          <article>
+            <h2>Improvement Opportunities</h2>
+            <ol id="improvementThemes"></ol>
+          </article>
+        </section>
+
+        <section class="chart-grid">
+          <article class="chart-panel">
+            <h2>Sentiment Distribution</h2>
+            <canvas id="sentimentChart" height="260"></canvas>
+          </article>
+          <article class="chart-panel wide">
+            <h2>Monthly Sentiment Trend</h2>
+            <canvas id="trendChart" height="260"></canvas>
+          </article>
+          <article class="chart-panel">
+            <h2>Rating Distribution</h2>
+            <canvas id="ratingChart" height="260"></canvas>
+          </article>
+          <article class="chart-panel wide">
+            <h2>Category Distribution</h2>
+            <canvas id="categoryChart" height="300"></canvas>
+          </article>
+          <article class="chart-panel">
+            <h2>Most Mentioned Topics</h2>
+            <canvas id="keywordChart" height="300"></canvas>
+          </article>
+          <article class="chart-panel">
+            <h2>Requested Improvements</h2>
+            <canvas id="suggestionChart" height="300"></canvas>
+          </article>
+        </section>
+      </section>
+
+      <section id="actionsTab" class="tab-panel" role="tabpanel">
+        <section class="urgent-section">
+          <div class="section-title">
+            <h2>Immediate Action Required</h2>
+            <span id="urgentCount"></span>
+          </div>
+          <div id="urgentConcerns" class="urgent-list"></div>
+        </section>
+      </section>
+
+      <section id="latestTab" class="tab-panel" role="tabpanel">
+        <article>
+          <div class="section-title">
+            <h2>Latest Reviews</h2>
+            <span id="latestCount"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Date</th><th>Rating</th><th>Sentiment</th><th>Review</th><th>Categories</th></tr>
+              </thead>
+              <tbody id="latestReviews"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section id="attentionTab" class="tab-panel" role="tabpanel">
+        <article>
+          <div class="section-title">
+            <h2>Reviews Requiring Attention</h2>
+            <span id="attentionCount"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Severity</th><th>Concern</th><th>Category</th><th>Recommended Action</th></tr>
+              </thead>
+              <tbody id="attentionReviews"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section id="categoryTab" class="tab-panel" role="tabpanel">
+        <article>
+          <div class="section-title">
+            <h2>Category Summary</h2>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Category</th><th>Reviews</th><th>Positive</th><th>Neutral</th><th>Negative</th></tr>
+              </thead>
+              <tbody id="categorySummary"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="./js/app.js?v=202607041300"></script>
+  </body>
+</html>
