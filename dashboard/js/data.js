@@ -1,15 +1,18 @@
 export async function loadReviews() {
+  const currentUrl = new URL(window.location.href);
   const paths = [
+    new URL("../google_reviews.json", currentUrl).toString(),
+    new URL("./google_reviews.json", currentUrl).toString(),
+    new URL("../google_review.json", currentUrl).toString(),
+    new URL("./google_review.json", currentUrl).toString(),
+    new URL("../dashboard/google_reviews.json", currentUrl).toString(),
+    new URL("./dashboard/google_reviews.json", currentUrl).toString(),
     "/google_reviews.json",
     "/google_review.json",
-    "../google_reviews.json",
-    "../google_review.json",
-    "./google_reviews.json",
-    "./google_review.json",
   ];
   let lastError = null;
 
-  for (const path of paths) {
+  for (const path of [...new Set(paths)]) {
     try {
       const response = await fetch(`${path}?v=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) {
